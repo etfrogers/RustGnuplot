@@ -1105,6 +1105,7 @@ pub struct AxesCommonData
 	pub margins: Margins,
 	pub palette: PaletteType<Vec<(f32, f32, f32, f32)>>,
 	pub colormaps: Vec<(String, PaletteType<Vec<(f32, f32, f32, f32)>>)>,
+	pub box_width: Option<(f64, bool)>,
 }
 
 impl AxesCommonData
@@ -1129,6 +1130,7 @@ impl AxesCommonData
 			margins: Margins::new(),
 			palette: COLOR.to_one_way_owned(),
 			colormaps: Vec::new(),
+			box_width: None,
 		};
 		ret.x2_axis.tick_type = TickType::None;
 		ret.y2_axis.tick_type = TickType::None;
@@ -1281,6 +1283,12 @@ impl AxesCommonData
 			writeln!(w, "set palette colormap __ORIGINAL_COLORMAP__");
 		}
 
+		if let Some((width, is_relative)) = self.box_width
+		{
+			let scale = if is_relative { "relative" } else { "absolute" };
+			writeln!(w, "set boxwidth {width} {scale}");
+		}
+
 		self.x_axis.write_out_commands(w, version);
 		self.y_axis.write_out_commands(w, version);
 		self.x2_axis.write_out_commands(w, version);
@@ -1409,6 +1417,18 @@ pub trait AxesCommon: AxesCommonPrivate
 	fn set_size(&mut self, w: f64, h: f64) -> &mut Self
 	{
 		self.get_common_data_mut().size = Some(Size { w, h });
+		self
+	}
+
+	/// Set the width of boxes in any box plots on the axes (for example [boxes()](crate::Axes2D::boxes),
+	/// [box_and_whisker()](crate::Axes2D::box_and_whisker))
+	/// # Arguments
+	/// * `width` - Width of boxes.
+	/// * `is_relative` - if `true`, `width` is interpreted as a fraction of the default box width.
+	/// 	if `false` width is an absolute value in the units of the x axis
+	fn set_box_width(&mut self, width: f64, is_relative: bool) -> &mut Self
+	{
+		self.get_common_data_mut().box_width = Some((width, is_relative));
 		self
 	}
 
