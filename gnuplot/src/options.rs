@@ -75,6 +75,8 @@ pub enum PlotOption<T>
 	WhiskerBars(f64),
 	/// Which axis pair to use for the plot element.
 	Axes(XAxis, YAxis),
+	/// Box width set per box for box plots: each element is the width of one box
+	BoxWidth(Vec<f64>),
 }
 
 #[allow(non_snake_case)]
@@ -123,6 +125,7 @@ impl<'l> OneWayOwned for PlotOption<&'l str>
 			WhiskerBars(v) => WhiskerBars(v),
 			FillPattern(v) => FillPattern(v),
 			Axes(x, y) => Axes(x, y),
+			BoxWidth(ref d) => BoxWidth(d.clone()),
 		}
 	}
 }
